@@ -1,0 +1,70 @@
+{
+  "settings": {
+    "http": {
+      "max_body_size": 52428800
+    }
+  },
+
+  "listeners": {
+    "*:80": {
+      "pass": "routes"
+    }
+  },
+
+  "routes": [
+    {
+      "match": {
+        "host": "test.local",
+        "uri": ["*.php", "*.php/*"]
+      },
+      "action": {
+        "pass": "applications/test/direct"
+      }
+    },
+    {
+      "match": {
+        "host": "test.local"
+      },
+      "action": {
+        "share": "/var/www/test/public$uri",
+        "fallback": {
+          "pass": "applications/test/index"
+        }
+      }
+    }
+  ],
+
+  "applications": {
+    "test": {
+      "type": "php 8.4",
+      "targets": {
+        "direct": {
+          "root": "/var/www/test/public/"
+        },
+        "index": {
+          "root": "/var/www/test/public/",
+          "script": "index.php"
+        }
+      },
+      "limits": {
+        "requests": 1000,
+        "timeout": 600
+      },
+      "processes": {
+        "max": 16,
+        "spare": 2,
+        "idle_timeout": 60
+      },
+      "user": "test",
+      "group": "test",
+      "options": {
+        "file": "/usr/local/etc/php/conf.d/php.ini"
+      }
+    }
+  },
+
+  "access_log": {
+    "path": "/dev/stdout",
+    "format": "$remote_addr - - [$time_local] \"$request_line\" $status $body_bytes_sent \"$header_referer\" \"$header_user_agent\" x-request-id \"$header_x_request_id\" traceparent \"$header_traceparent\" time $request_time"
+  }
+}

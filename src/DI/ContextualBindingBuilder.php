@@ -30,12 +30,12 @@ class ContextualBindingBuilder
 
     /**
      * @param class-string|string|callable $implementation
-     * @throws RuntimeException
+     * @throws Exception
      */
     public function give(mixed $implementation): void
     {
         if ($this->needs === null) {
-            throw new \RuntimeException("Must call needs() before give()");
+            throw new \Exception("Must call needs() before give()");
         }
 
         $this->container->addContextualBinding(
