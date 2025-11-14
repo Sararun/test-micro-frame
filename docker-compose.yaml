@@ -1,0 +1,23 @@
+services:
+  nginx-unit:
+    container_name: nginx-unit
+    build: ./containers/local/nginx_unit
+    env_file:
+      - .env
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www/test
+      - ./containers/local/nginx_unit/config/config.json:/docker-entrypoint.d/config.json
+    networks:
+      pim:
+        ipv4_address: 192.168.218.13
+networks:
+  pim:
+    driver: bridge
+    enable_ipv6: false
+    ipam:
+      driver: default
+      config:
+        -   subnet: 192.168.218.0/24
