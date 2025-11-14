@@ -167,13 +167,13 @@ class Container implements ContainerInterface, ToCompileContainer
     }
 
     /**
-     * @throws RuntimeException
      * @throws ReflectionException
+     * @throws Exception
      */
     private function build(string $concrete, array $parameters = []): object
     {
         if (in_array($concrete, $this->resolving)) {
-            throw new RuntimeException(
+            throw new Exception(
                 "Circular dependency detected: " . implode(' -> ', $this->resolving) . " -> {$concrete}"
             );
         }
@@ -184,7 +184,7 @@ class Container implements ContainerInterface, ToCompileContainer
             $reflector = new ReflectionClass($concrete);
 
             if (!$reflector->isInstantiable()) {
-                throw new RuntimeException("Class {$concrete} is not instantiable");
+                throw new Exception("Class {$concrete} is not instantiable");
             }
 
             $constructor = $reflector->getConstructor();
@@ -220,7 +220,7 @@ class Container implements ContainerInterface, ToCompileContainer
             $type = $param->getType();
 
             if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
-                return $this->resolve($type->getName());
+                return $this->get($type->getName());
             }
 
             if ($param->isDefaultValueAvailable()) {
@@ -267,15 +267,18 @@ class Container implements ContainerInterface, ToCompileContainer
         $this->allowRuntimeResolution = $allow;
     }
 
+    /**
+     * @throws Exception
+     */
     public function addContextualBinding(string $concrete, string $abstract, mixed $implementation): void
     {
         if (!isset($this->bindings[$concrete])) {
-            throw new RuntimeException(
+            throw new Exception(
                 "Cannot add contextual binding: concrete '{$concrete}' is not registered and does not exist"
             );
         }
         if (!isset($this->bindings[$abstract])) {
-            throw new RuntimeException(
+            throw new Exception(
                 "Cannot add contextual binding: abstract '{$abstract}' is not registered and does not exist"
             );
         }
