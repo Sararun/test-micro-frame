@@ -46,7 +46,7 @@ class ContainerCompiler
             $this->analyzeCommands($consoleRouter);
         }
 
-        $code = $this->generateContainerClass('CachedContainer', $namespace);
+        $code = $this->generateContainerClass($namespace);
         $directory = dirname($outputFile);
         if (!is_dir($directory)) {
             mkdir($directory, 0755, true);
@@ -183,7 +183,7 @@ class ContainerCompiler
     /**
      * @throws Exception
      */
-    private function generateContainerClass(string $className, string $namespace): string
+    private function generateContainerClass(string $namespace): string
     {
         $methods = [];
         $getterCases = [];
@@ -250,7 +250,7 @@ use Src\\router\Request;
  * Compiled container - auto-generated, do not edit!
  * Generated at: {$this->getCurrentDateTime()}
  */
-class {$className} implements ContainerInterface
+class CachedContainer implements ContainerInterface
 {
     private array \$instances = [];
 
@@ -321,9 +321,7 @@ PHP;
         $casesCode = implode("\n", $cases);
 
         return <<<PHP
-/**
-     * Вызывает консольную команду. Ожидается, что команды вернут int (код завершения).
-     */
+
     public function callCommand(string \$controller, string \$method, array \$runtimeParams = []): int
     {
         \$key = \$controller . '::' . \$method;

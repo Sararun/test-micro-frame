@@ -3,19 +3,15 @@
 namespace Src\DI;
 
 use Exception;
-use Psr\Container\ContainerInterface;
-use RuntimeException;
+use Src\DI\Interfaces\AllowContextualBinding;
 
 class ContextualBindingBuilder
 {
-    private ContainerInterface $container;
-    private string $concrete;
     private ?string $needs = null;
 
-    public function __construct(ContainerInterface $container, string $concrete)
+    public function __construct(private AllowContextualBinding $container, private string $concrete)
     {
-        $this->container = $container;
-        $this->concrete = $concrete;
+
     }
 
     /**
@@ -29,10 +25,10 @@ class ContextualBindingBuilder
 
 
     /**
-     * @param class-string|string|callable $implementation
+     * @param class-string $implementation
      * @throws Exception
      */
-    public function give(mixed $implementation): void
+    public function give(string $implementation): void
     {
         if ($this->needs === null) {
             throw new \Exception("Must call needs() before give()");
