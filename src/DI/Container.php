@@ -14,9 +14,10 @@ use ReflectionNamedType;
 use ReflectionParameter;
 
 use RuntimeException;
+use Src\DI\Interfaces\AllowContextualBinding;
 use Src\DI\Interfaces\ToCompileContainer;
 
-class Container implements ContainerInterface, ToCompileContainer
+class Container implements ContainerInterface, AllowContextualBinding, ToCompileContainer
 {
     /**
      * @var array<string, BindingValue>
@@ -24,7 +25,7 @@ class Container implements ContainerInterface, ToCompileContainer
     private(set) array $bindings = [];
 
     /**
-     * @var array<string, mixed>
+     * @var array<class-string, object>
      */
     public array $instances = [];
 
@@ -84,11 +85,14 @@ class Container implements ContainerInterface, ToCompileContainer
     }
 
     /**
+     * @template T of object
+     * @param class-string<T> $id
+     * @return T
      * @throws NotFoundException
      * @throws RuntimeException
      * @throws Exception
      */
-    public function get(string $id): mixed
+    public function get(string $id): object
     {
         if (isset($this->instances[$id])) {
             return $this->instances[$id];
@@ -131,9 +135,12 @@ class Container implements ContainerInterface, ToCompileContainer
     }
 
     /**
+     * @template T of object
+     * @param class-string<T> $abstract
+     * @param mixed[] $parameters
      * @throws Exception
      */
-    private function resolve(string $abstract, array $parameters = []): mixed
+    private function resolve(string $abstract, array $parameters = []): object
     {
         if (isset($this->instances[$abstract])) {
             return $this->instances[$abstract];
@@ -141,6 +148,7 @@ class Container implements ContainerInterface, ToCompileContainer
 
         $concrete = $this->getConcrete($abstract);
 
+        /** @var object $instance */
         $instance = $this->build($concrete, $parameters);
 
         if (isset($this->bindings[$abstract]) && $this->bindings[$abstract]->singleton) {
@@ -270,7 +278,7 @@ class Container implements ContainerInterface, ToCompileContainer
     /**
      * @throws Exception
      */
-    public function addContextualBinding(string $concrete, string $abstract, mixed $implementation): void
+    public function addContextualBinding(string $concrete, string $abstract, string $implementation): void
     {
         if (!isset($this->bindings[$concrete])) {
             throw new Exception(
